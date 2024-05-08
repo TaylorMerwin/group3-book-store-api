@@ -61,6 +61,19 @@ bookRouter.get('/Allauthors', (request: Request, response: Response) => {
 
 
 //This is to delete books by authors
+/**
+ * @api {delete} /books/authors/:authorName Deletes books by author
+ * @apiName DeleteBooksByAuthor
+ * @apiGroup Book
+ *
+ * @apiParam {String} The author of the books to delete
+ * @apiParam {String} password User's password.
+ *
+ * @apiSuccess {String} message Success message confirming the deletion of books by author.
+ * @apiError (404: Book Not Found) {String} message "Book not found"
+ */
+
+
 
 bookRouter.delete('/authors/:authorName', (request: Request, response: Response) => {
   const theQuery = 'DELETE FROM BOOKS WHERE authors = $1 RETURNING *';
@@ -93,7 +106,17 @@ bookRouter.delete('/authors/:authorName', (request: Request, response: Response)
       });
 });
 
-//This is to delete books by ISBN13
+/**
+ * @api {delete} /books/isbn/:isbn13 Deletes books by isbn13
+ * @apiName DeleteBooksByisbn13
+ * @apiGroup Book
+ *
+ * @apiParam {String} The author of the books to delete
+ * @apiParam {String} password User's password.
+ *
+ * @apiSuccess {String} message Success message confirming the deletion of books by author.
+ * @apiError (404: Book Not Found) {String} message "Book not found"
+ */
 bookRouter.delete('/isbn/:isbn13', (request: Request, response: Response) => {
   const theQuery = 'DELETE FROM BOOKS WHERE isbn13 = $1 RETURNING *';
   const isbn = request.params.isbn13;
@@ -125,7 +148,17 @@ bookRouter.delete('/isbn/:isbn13', (request: Request, response: Response) => {
       });
 });
 
-//This is to delete books by ISBN13
+/**
+ * @api {delete} /books/bookId/:id Deletes a book by ID
+ * @apiName DeleteBookByID
+ * @apiGroup Book
+ *
+ * @apiParam {int} id The ID of the book to delete
+ * @apiParam {String} password User's password.
+ *
+ * @apiSuccess {String} message Success message confirming the deletion of the book by ID.
+ * @apiError (404: Book Not Found) {String} message "Book not found"
+ */
 bookRouter.delete('/bookId/:id', (request: Request, response: Response) => {
   const theQuery = 'DELETE FROM BOOKS WHERE id = $1 RETURNING *';
   const theId = request.params.id;
@@ -156,9 +189,17 @@ bookRouter.delete('/bookId/:id', (request: Request, response: Response) => {
           });
       });
 });
-
-
-//This is to delete books by ISBN13
+/**
+ * @api {delete} /books/bookTitle/:title Deletes a book by title
+ * @apiName DeleteBookByTitle
+ * @apiGroup Book
+ *
+ * @apiParam {int} id The ID of the book to delete
+ * @apiParam {String} password User's password.
+ *
+ * @apiSuccess {String} message Success message confirming the deletion of the book by ID.
+ * @apiError (404: Book Not Found) {String} message "Book not found"
+ */
 bookRouter.delete('/bookTitle/:title', (request: Request, response: Response) => {
     const theQuery = 'DELETE FROM BOOKS WHERE title = $1 RETURNING *';
     const theTitle= request.params.title;
@@ -168,15 +209,15 @@ bookRouter.delete('/bookTitle/:title', (request: Request, response: Response) =>
         .then((result) => {
             if (result.rowCount === 1) {
                 response.send({
-                    entry: 'Deleted books(s) by id: ' + theTitle,
+                    entry: 'Deleted books(s) by Title: ' + theTitle,
                 });
             } else if (result.rowCount > 1) {
                 response.send({
-                    entry: 'Deleted ' + result.rowCount + ' book(s) by id: ' + theTitle,
+                    entry: 'Deleted ' + result.rowCount + ' book(s) by Title: ' + theTitle,
                 });
             } else {
                 response.status(404).send({
-                    message: 'No books found by id: ' + theTitle,
+                    message: 'No books found by Title: ' + theTitle,
                 });
             }
         })
