@@ -124,4 +124,69 @@ bookRouter.delete('/isbn/:isbn13', (request: Request, response: Response) => {
           });
       });
 });
+
+//This is to delete books by ISBN13
+bookRouter.delete('/bookId/:id', (request: Request, response: Response) => {
+  const theQuery = 'DELETE FROM BOOKS WHERE id = $1 RETURNING *';
+  const theId = request.params.id;
+  const values = [theId];
+
+  pool.query(theQuery, values)
+      .then((result) => {
+          if (result.rowCount === 1) {
+              response.send({
+                  entry: 'Deleted books(s) by id: ' + theId,
+              });
+          } else if (result.rowCount > 1) {
+              response.send({
+                  entry: 'Deleted ' + result.rowCount + ' book(s) by id: ' + theId,
+              });
+          } else {
+              response.status(404).send({
+                  message: 'No books found by id: ' + theId,
+              });
+          }
+      })
+      .catch((error) => {
+          // Log the error
+          console.error('Error executing DELETE query:', error);
+          response.status(500).send({
+              message: 'Error deleting books - contact support',
+              error: error.message, // Include the error message for debugging
+          });
+      });
+});
+
+
+//This is to delete books by ISBN13
+bookRouter.delete('/bookTitle/:title', (request: Request, response: Response) => {
+    const theQuery = 'DELETE FROM BOOKS WHERE title = $1 RETURNING *';
+    const theTitle= request.params.title;
+    const values = [theTitle];
+  
+    pool.query(theQuery, values)
+        .then((result) => {
+            if (result.rowCount === 1) {
+                response.send({
+                    entry: 'Deleted books(s) by id: ' + theTitle,
+                });
+            } else if (result.rowCount > 1) {
+                response.send({
+                    entry: 'Deleted ' + result.rowCount + ' book(s) by id: ' + theTitle,
+                });
+            } else {
+                response.status(404).send({
+                    message: 'No books found by id: ' + theTitle,
+                });
+            }
+        })
+        .catch((error) => {
+            // Log the error
+            console.error('Error executing DELETE query:', error);
+            response.status(500).send({
+                message: 'Error deleting books - contact support',
+                error: error.message, // Include the error message for debugging
+            });
+        });
+  });
 export { bookRouter };
