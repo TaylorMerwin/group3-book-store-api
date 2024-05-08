@@ -1,4 +1,4 @@
-import { pool } from './sql_conn';
+import { pool } from '../db/sql_conn';
 
 import { validationFunctions } from './validationUtils';
 

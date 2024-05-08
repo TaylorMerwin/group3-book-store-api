@@ -163,7 +163,24 @@ messageRouter.get('/all', (request: Request, response: Response) => {
             });
         });
 });
+messageRouter.get('/Allisbn', (request: Request, response: Response) => {
+    const theQuery = 'SELECT isbn13 FROM BOOKS';
 
+    pool.query(theQuery)
+        .then((result) => {
+            response.send({
+                entries: result.rows
+            });
+        })
+        .catch((error) => {
+            //log the error
+            console.error('DB Query error on GET all');
+            console.error(error);
+            response.status(500).send({
+                message: 'server error - contact support',
+            });
+        });
+});
 /**
  * @api {get} /message Request to retrieve entries
  *
