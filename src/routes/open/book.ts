@@ -26,9 +26,8 @@ bookRouter.get('/ISBN/:isbn', async (request: Request, response: Response) => {
 FROM books b
 LEFT JOIN ratings r ON b.id = r.book_id
 WHERE b.isbn13 = $1
-GROUP BY b.id, b.isbn13, b.authors, b.publication_year, b.original_title, b.title, b.image_url, b.image_small_url;
-;
-`;
+GROUP BY b.id, b.isbn13, b.authors, b.publication_year, b.original_title, b.title, b.image_url, b.image_small_url
+ORDER BY b.id ASC;`;
     const values = [request.params.isbn];
 
     try {
@@ -62,10 +61,19 @@ bookRouter.get('/', async (request: Request, response: Response) => {
     b.original_title,
     b.title,
     b.image_url,
-    b.image_small_url
+    b.image_small_url,
+    COUNT(r.rating) as rating_count, 
+    AVG(r.rating) as average_rating,
+    SUM(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END) as rating_1_star,
+    SUM(CASE WHEN r.rating = 2 THEN 1 ELSE 0 END) as rating_2_star,
+    SUM(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END) as rating_3_star,
+    SUM(CASE WHEN r.rating = 4 THEN 1 ELSE 0 END) as rating_4_star,
+    SUM(CASE WHEN r.rating = 5 THEN 1 ELSE 0 END) as rating_5_star
     FROM books b
+    LEFT JOIN ratings r ON b.id = r.book_id
     WHERE b.id > ($2 * ($1 - 1))
-    ORDER BY b.id
+    GROUP BY b.id, b.isbn13, b.authors, b.publication_year, b.original_title, b.title, b.image_url, b.image_small_url
+    ORDER BY b.id ASC
     LIMIT $2;`;
     const values = [request.query.page, request.query.size];
     try {
@@ -92,18 +100,33 @@ bookRouter.get(
     '/year/:pubYear',
     async (request: Request, response: Response) => {
         const theQuery = `
-  SELECT 
-  b.id,
-  b.isbn13,
-  b.authors,
-  b.publication_year,
-  b.original_title,
-  b.title,
-  b.image_url,
-  b.image_small_url
-  FROM books b
-  WHERE b.publication_year = $1`;
-        const values = [request.params.pubYear];
+        SELECT 
+        b.id,
+        b.isbn13,
+        b.authors,
+        b.publication_year,
+        b.original_title,
+        b.title,
+        b.image_url,
+        b.image_small_url,
+        COUNT(r.rating) as rating_count, 
+        AVG(r.rating) as average_rating,
+        SUM(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END) as rating_1_star,
+        SUM(CASE WHEN r.rating = 2 THEN 1 ELSE 0 END) as rating_2_star,
+        SUM(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END) as rating_3_star,
+        SUM(CASE WHEN r.rating = 4 THEN 1 ELSE 0 END) as rating_4_star,
+        SUM(CASE WHEN r.rating = 5 THEN 1 ELSE 0 END) as rating_5_star
+      FROM books b
+      LEFT JOIN ratings r ON b.id = r.book_id
+        WHERE b.publication_year = $3 AND b.id > ($2 * ($1 - 1))
+        GROUP BY b.id, b.isbn13, b.authors, b.publication_year, b.original_title, b.title, b.image_url, b.image_small_url
+        ORDER BY b.id ASC
+        LIMIT $2;`;
+        const values = [
+            request.query.page,
+            request.query.size,
+            request.params.pubYear,
+        ];
 
         try {
             const result = await pool.query(theQuery, values);
