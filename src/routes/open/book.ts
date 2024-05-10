@@ -259,4 +259,110 @@ ORDER BY b.id ASC;`;
     }
 });
 
+// Get top rated books
+bookRouter.get('/topRated', async (request: Request, response: Response) => {
+    const theQuery = `
+        SELECT * FROM
+        (SELECT 
+        b.id,
+        b.isbn13,
+        b.authors,
+        b.publication_year,
+        b.original_title,
+        b.title,
+        b.image_url,
+        b.image_small_url,
+        COUNT(r.rating) as rating_count, 
+        AVG(r.rating) as average_rating,
+        SUM(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END) as rating_1_star,
+        SUM(CASE WHEN r.rating = 2 THEN 1 ELSE 0 END) as rating_2_star,
+        SUM(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END) as rating_3_star,
+        SUM(CASE WHEN r.rating = 4 THEN 1 ELSE 0 END) as rating_4_star,
+        SUM(CASE WHEN r.rating = 5 THEN 1 ELSE 0 END) as rating_5_star
+      FROM books b
+      LEFT JOIN ratings r ON b.id = r.book_id
+        GROUP BY b.id, b.isbn13, b.authors, b.publication_year, b.original_title, b.title, b.image_url, b.image_small_url
+        HAVING AVG(rating) >= 4
+        ORDER BY average_rating DESC)
+        OFFSET $2 * ($1 - 1)
+        LIMIT $2;`;
+    const values = [request.query.page, request.query.size];
+
+    try {
+        const result = await pool.query(theQuery, values);
+        if (result.rowCount === 0) {
+            console.log('No top rated books!');
+            response.status(404).send({
+                message: 'No books with an average rating above 4 stars',
+            });
+        } else {
+            response.send({
+                entry: result.rows,
+            });
+        }
+    } catch (error) {
+        console.error('Error executing database query:', error);
+        response.status(500).send({
+            message: 'Error fetching book',
+        });
+    }
+});
+
+// Get books within a specific average rating bound
+bookRouter.get(
+    '/rating/:stars',
+    async (request: Request, response: Response) => {
+        const theQuery = `
+        SELECT * FROM
+        (SELECT 
+        b.id,
+        b.isbn13,
+        b.authors,
+        b.publication_year,
+        b.original_title,
+        b.title,
+        b.image_url,
+        b.image_small_url,
+        COUNT(r.rating) as rating_count, 
+        AVG(r.rating) as average_rating,
+        SUM(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END) as rating_1_star,
+        SUM(CASE WHEN r.rating = 2 THEN 1 ELSE 0 END) as rating_2_star,
+        SUM(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END) as rating_3_star,
+        SUM(CASE WHEN r.rating = 4 THEN 1 ELSE 0 END) as rating_4_star,
+        SUM(CASE WHEN r.rating = 5 THEN 1 ELSE 0 END) as rating_5_star
+      FROM books b
+      LEFT JOIN ratings r ON b.id = r.book_id
+        GROUP BY b.id, b.isbn13, b.authors, b.publication_year, b.original_title, b.title, b.image_url, b.image_small_url
+        HAVING $3 >= AVG(rating) and AVG(rating) >= $4
+        ORDER BY b.id ASC)
+        OFFSET $2 * ($1 - 1)
+        LIMIT $2;`;
+        const values = [
+            request.query.page,
+            request.query.size,
+            Number(request.params.stars) + 0.5,
+            Number(request.params.stars) - 0.5,
+        ];
+
+        try {
+            const result = await pool.query(theQuery, values);
+            if (result.rowCount === 0) {
+                console.log('No top rated books!');
+                response.status(404).send({
+                    message: 'No books with an average rating above 4 stars',
+                });
+            } else {
+                response.send({
+                    entry: result.rows,
+                });
+            }
+        } catch (error) {
+            console.error('Error executing database query:', error);
+            response.status(500).send({
+                message: 'Error fetching book',
+            });
+        }
+    }
+);
+
 export { bookRouter };
