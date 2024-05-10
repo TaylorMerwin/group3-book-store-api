@@ -15,9 +15,20 @@ bookRouter.get('/ISBN/:isbn', async (request: Request, response: Response) => {
   b.original_title,
   b.title,
   b.image_url,
-  b.image_small_url
-  FROM books b
-  WHERE b.isbn13 = $1`;
+  b.image_small_url,
+  COUNT(r.rating) as rating_count, 
+  AVG(r.rating) as average_rating,
+  SUM(CASE WHEN r.rating = 1 THEN 1 ELSE 0 END) as rating_1_star,
+  SUM(CASE WHEN r.rating = 2 THEN 1 ELSE 0 END) as rating_2_star,
+  SUM(CASE WHEN r.rating = 3 THEN 1 ELSE 0 END) as rating_3_star,
+  SUM(CASE WHEN r.rating = 4 THEN 1 ELSE 0 END) as rating_4_star,
+  SUM(CASE WHEN r.rating = 5 THEN 1 ELSE 0 END) as rating_5_star
+FROM books b
+LEFT JOIN ratings r ON b.id = r.book_id
+WHERE b.isbn13 = $1
+GROUP BY b.id, b.isbn13, b.authors, b.publication_year, b.original_title, b.title, b.image_url, b.image_small_url;
+;
+`;
     const values = [request.params.isbn];
 
     try {
@@ -35,7 +46,7 @@ bookRouter.get('/ISBN/:isbn', async (request: Request, response: Response) => {
     } catch (error) {
         console.error('Error executing database query:', error);
         response.status(500).send({
-            message: 'Error fetching book',
+            message: 'Error fetching book' + error,
         });
     }
 });
