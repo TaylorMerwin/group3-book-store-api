@@ -60,183 +60,117 @@ bookRouter.get('/Allauthors', (request: Request, response: Response) => {
       });
 });
 
-/**
- * @api {put} /book/title/:isbn Update Book Title
- * @apiName UpdateBookTitle
- * @apiGroup Book
- *
- * @apiParam {Number} isbn Book's unique ISBN.
- * @apiParam {String} title New title of the Book.
- *
- * @apiSuccess {String} message "Title updated successfully."
- * @apiError (404: ISBN Not Found) {String} message "ISBN not found."
- */
+// Update title based on current title
+bookRouter.put('/book/updateTitle', async (request: Request, response: Response) => {
+    const currentTitle = request.body.currentTitle;
+    const newTitle = request.body.newTitle;
+    const theQuery = 'UPDATE BOOKS SET title = $1 WHERE title = $2 RETURNING *';
 
-bookRouter.put('/book/title/:isbn', async (req: Request, res: Response) => {
-    const { isbn } = req.params;
-    const { title } = req.body;
-
-    const updateQuery = `UPDATE books SET title = $1 WHERE isbn13 = $2 RETURNING *;`;
     try {
-        const result = await pool.query(updateQuery, [title, isbn]);
+        const result = await pool.query(theQuery, [newTitle, currentTitle]);
         if (result.rowCount > 0) {
-            res.json({ message: "Title updated successfully." });
+            response.send({ message: "Title updated successfully." });
         } else {
-            res.status(404).json({ message: "ISBN not found." });
+            response.status(404).send({ message: "Original title not found." });
         }
     } catch (error) {
         console.error('Error updating title:', error);
-        res.status(500).send({ message: 'Error updating book title' });
+        response.status(500).send({ message: 'Internal server error' });
     }
 });
 
-/**
- * @api {put} /book/isbn/:id Update Book ISBN
- * @apiName UpdateBookISBN
- * @apiGroup Book
- *
- * @apiParam {Number} id Book's unique ID.
- * @apiParam {Number} isbn New ISBN of the Book.
- *
- * @apiSuccess {String} message "ISBN updated successfully."
- * @apiError (404: ID Not Found) {String} message "Book ID not found."
- */
+// Update ISBN based on current ISBN
+bookRouter.put('/book/updateIsbn', async (request: Request, response: Response) => {
+    const currentIsbn = request.body.currentIsbn;
+    const newIsbn = request.body.newIsbn;
+    const theQuery = 'UPDATE BOOKS SET isbn13 = $1 WHERE isbn13 = $2 RETURNING *';
 
-bookRouter.put('/book/isbn/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { isbn } = req.body;
-
-    const updateQuery = `UPDATE books SET isbn13 = $1 WHERE id = $2 RETURNING *;`;
     try {
-        const result = await pool.query(updateQuery, [isbn, id]);
+        const result = await pool.query(theQuery, [newIsbn, currentIsbn]);
         if (result.rowCount > 0) {
-            res.json({ message: "ISBN updated successfully." });
+            response.send({ message: "ISBN updated successfully." });
         } else {
-            res.status(404).json({ message: "Book ID not found." });
+            response.status(404).send({ message: "Original ISBN not found." });
         }
     } catch (error) {
         console.error('Error updating ISBN:', error);
-        res.status(500).send({ message: 'Error updating book ISBN' });
+        response.status(500).send({ message: 'Internal server error' });
     }
 });
 
-/**
- * @api {put} /book/author/:id Update Book Author
- * @apiName UpdateBookAuthor
- * @apiGroup Book
- *
- * @apiParam {Number} id Book's unique ID.
- * @apiParam {String} author New author of the Book.
- *
- * @apiSuccess {String} message "Author updated successfully."
- * @apiError (404: ID Not Found) {String} message "Book ID not found."
- */
+// Update author based on ID
+bookRouter.put('/book/updateAuthor/:id', async (request: Request, response: Response) => {
+    const id = request.params.id;
+    const newAuthor = request.body.author;
+    const theQuery = 'UPDATE BOOKS SET authors = $1 WHERE id = $2 RETURNING *';
 
-bookRouter.put('/book/author/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { author } = req.body;
-
-    const updateQuery = `UPDATE books SET authors = $1 WHERE id = $2 RETURNING *;`;
     try {
-        const result = await pool.query(updateQuery, [author, id]);
+        const result = await pool.query(theQuery, [newAuthor, id]);
         if (result.rowCount > 0) {
-            res.json({ message: "Author updated successfully." });
+            response.send({ message: "Author updated successfully." });
         } else {
-            res.status(404).json({ message: "Book ID not found." });
+            response.status(404).send({ message: "Book ID not found." });
         }
     } catch (error) {
         console.error('Error updating author:', error);
-        res.status(500).send({ message: 'Error updating book author' });
+        response.status(500).send({ message: 'Internal server error' });
     }
 });
 
-/**
- * @api {put} /book/date/:id Update Book Publication Date
- * @apiName UpdateBookDate
- * @apiGroup Book
- *
- * @apiParam {Number} id Book's unique ID.
- * @apiParam {String} date New publication date of the Book.
- *
- * @apiSuccess {String} message "Publication date updated successfully."
- * @apiError (404: ID Not Found) {String} message "Book ID not found."
- */
+// Update publication date based on ID
+bookRouter.put('/book/updateDate/:id', async (request: Request, response: Response) => {
+    const id = request.params.id;
+    const newDate = request.body.date;
+    const theQuery = 'UPDATE BOOKS SET publication_year = $1 WHERE id = $2 RETURNING *';
 
-bookRouter.put('/book/date/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { date } = req.body;
-
-    const updateQuery = `UPDATE books SET publication_year = $1 WHERE id = $2 RETURNING *;`;
     try {
-        const result = await pool.query(updateQuery, [date, id]);
+        const result = await pool.query(theQuery, [newDate, id]);
         if (result.rowCount > 0) {
-            res.json({ message: "Publication date updated successfully." });
+            response.send({ message: "Publication date updated successfully." });
         } else {
-            res.status(404).json({ message: "Book ID not found." });
+            response.status(404).send({ message: "Book ID not found." });
         }
     } catch (error) {
         console.error('Error updating publication date:', error);
-        res.status(500).send({ message: 'Error updating book publication date' });
+        response.status(500).send({ message: 'Internal server error' });
     }
 });
 
-/**
- * @api {put} /book/rating/:id Update Book Rating
- * @apiName UpdateBookRating
- * @apiGroup Book
- *
- * @apiParam {Number} id Book's unique ID.
- * @apiParam {Number} rating New rating of the Book (1-5).
- *
- * @apiSuccess {String} message "Rating updated successfully."
- * @apiError (404: ID Not Found) {String} message "Book ID not found."
- */
+// Update rating based on ID
+bookRouter.put('/book/updateRating/:id', async (request: Request, response: Response) => {
+    const id = request.params.id;
+    const newRating = request.body.rating;
+    const theQuery = 'UPDATE BOOKS SET rating = $1 WHERE id = $2 RETURNING *';
 
-bookRouter.put('/book/rating/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { rating } = req.body;
-
-    const updateQuery = `UPDATE books SET rating = $1 WHERE id = $2 RETURNING *;`;
     try {
-        const result = await pool.query(updateQuery, [rating, id]);
+        const result = await pool.query(theQuery, [newRating, id]);
         if (result.rowCount > 0) {
-            res.json({ message: "Rating updated successfully." });
+            response.send({ message: "Rating updated successfully." });
         } else {
-            res.status(404).json({ message: "Book ID not found." });
+            response.status(404).send({ message: "Book ID not found." });
         }
     } catch (error) {
         console.error('Error updating rating:', error);
-        res.status(500).send({ message: 'Error updating book rating' });
+        response.status(500).send({ message: 'Internal server error' });
     }
 });
 
-/**
- * @api {put} /book/images/:id Update Book Images
- * @apiName UpdateBookImages
- * @apiGroup Book
- *
- * @apiParam {Number} id Book's unique ID.
- * @apiParam {String[]} images Array of new image URLs for the Book.
- *
- * @apiSuccess {String} message "Images updated successfully."
- * @apiError (404: ID Not Found) {String} message "Book ID not found."
- */
+// Update images based on ID
+bookRouter.put('/book/updateImages/:id', async (request: Request, response: Response) => {
+    const id = request.params.id;
+    const newImages = request.body.images;
+    const theQuery = 'UPDATE BOOKS SET image_url = $1 WHERE id = $2 RETURNING *';
 
-bookRouter.put('/book/images/:id', async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const { images } = req.body; // assuming images is an array of URLs
-
-    const updateQuery = `UPDATE books SET image_urls = $1 WHERE id = $2 RETURNING *;`;
     try {
-        const result = await pool.query(updateQuery, [images, id]);
+        const result = await pool.query(theQuery, [newImages.join(','), id]); // Assuming image URLs are stored as a comma-separated string
         if (result.rowCount > 0) {
-            res.json({ message: "Images updated successfully." });
+            response.send({ message: "Images updated successfully." });
         } else {
-            res.status(404).json({ message: "Book ID not found." });
+            response.status(404).send({ message: "Book ID not found." });
         }
     } catch (error) {
         console.error('Error updating images:', error);
-        res.status(500).send({ message: 'Error updating book images' });
+        response.status(500).send({ message: 'Internal server error' });
     }
 });
 
