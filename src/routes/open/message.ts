@@ -163,6 +163,8 @@ messageRouter.get('/all', (request: Request, response: Response) => {
             });
         });
 });
+//This is just to look up for ISBN to do testing
+
 messageRouter.get('/Allisbn', (request: Request, response: Response) => {
     const theQuery = 'SELECT isbn13 FROM BOOKS';
 

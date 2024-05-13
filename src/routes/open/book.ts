@@ -39,7 +39,8 @@ bookRouter.get('ISBN/:isbn', async (request: Request, response: Response) => {
     });
   }
 });
-//entry point is "books"
+
+//This is just to look up for authors to do testing
 bookRouter.get('/Allauthors', (request: Request, response: Response) => {
   const theQuery = 'SELECT authors FROM BOOKS';
 
