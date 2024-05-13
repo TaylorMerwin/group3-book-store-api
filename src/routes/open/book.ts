@@ -155,21 +155,21 @@ bookRouter.put('/book/updateRating/:id', async (request: Request, response: Resp
     }
 });
 
-// Update images based on ID
-bookRouter.put('/book/updateImages/:id', async (request: Request, response: Response) => {
+// Update image based on ID
+bookRouter.put('/book/updateImage/:id', async (request: Request, response: Response) => {
     const id = request.params.id;
-    const newImages = request.body.images;
+    const newImageUrl = request.body.imageUrl;
     const theQuery = 'UPDATE BOOKS SET image_url = $1 WHERE id = $2 RETURNING *';
 
     try {
-        const result = await pool.query(theQuery, [newImages.join(','), id]); // Assuming image URLs are stored as a comma-separated string
+        const result = await pool.query(theQuery, [newImageUrl, id]);
         if (result.rowCount > 0) {
-            response.send({ message: "Images updated successfully." });
+            response.send({ message: "Image updated successfully." });
         } else {
             response.status(404).send({ message: "Book ID not found." });
         }
     } catch (error) {
-        console.error('Error updating images:', error);
+        console.error('Error updating image:', error);
         response.status(500).send({ message: 'Internal server error' });
     }
 });
